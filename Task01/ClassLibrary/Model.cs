@@ -83,16 +83,12 @@ namespace RecognitionLibrary
             {
                 if (_stopSignal.WaitOne(0))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Stopping thread by signal");
-                    Console.ResetColor();
                     return;
                 }
                 Console.WriteLine(Predict(ImageToTensor(name)));
             }
-            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Stopping thread normally");
-            Console.ResetColor();
         }
         public void Work()
         {
@@ -105,22 +101,20 @@ namespace RecognitionLibrary
                 Console.WriteLine("Directory doesn't exist!");
                 return;
             }
-            
-            var max_proc_count = Environment.ProcessorCount;
-            Thread[] threads = new Thread[max_proc_count];
-            for (int i = 0; i < max_proc_count; ++i)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Statring thread");
-                Console.ResetColor();
-                threads[i] = new Thread(worker);
-                threads[i].Start();
-            }
 
             Console.CancelKeyPress += (sender, eArgs) => {
                 _stopSignal.Set();
                 eArgs.Cancel = true;
             };
+
+            var max_proc_count = Environment.ProcessorCount;
+            Thread[] threads = new Thread[max_proc_count];
+            for (int i = 0; i < max_proc_count; ++i)
+            {
+                Console.WriteLine("Statring thread");
+                threads[i] = new Thread(worker);
+                threads[i].Start();
+            }
 
             for (int i = 0; i < max_proc_count; ++i)
             {
