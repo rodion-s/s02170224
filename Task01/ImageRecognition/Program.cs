@@ -25,7 +25,6 @@ namespace ImageRecognition
                 model.Stop();
                 eArgs.Cancel = true;
             };
-            //Console.WriteLine()
 
             model.Work();
         }
