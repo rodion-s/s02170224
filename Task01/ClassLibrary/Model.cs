@@ -20,13 +20,19 @@ namespace RecognitionLibrary
         private string _img_path;
         private InferenceSession session;
         private ConcurrentQueue<string> filenames;
-        
-        public Model(
+
+
+        public delegate void Output(string msg);
+        Output write;
+
+        public Model(Output write,
             string model_path = "./../../../../resnet50-v2-7.onnx",
-            string img_path = "./../../../../dog.jpeg")
+            string img_path = "./../../../../dog.jpeg"
+            )
         {
             this._img_path = img_path;
             this.session = new InferenceSession(model_path);
+            this.write += write;
         }
         
         private DenseTensor<float> ImageToTensor(string single_img_path)
@@ -73,9 +79,14 @@ namespace RecognitionLibrary
             var output = results.First().AsEnumerable<float>().ToArray();
             var sum = output.Sum(x => (float)Math.Exp(x));
             var softmax = output.Select(x => (float)Math.Exp(x) / sum);
-            var class_idx = softmax.ToList().IndexOf(softmax.Max());
-            return LabelMap.classLabels[class_idx];
+
+            var confidence = softmax.Max();
+            var class_idx = softmax.ToList().IndexOf(confidence);
+
+            var ans = String.Format("Label: {0}, Confidence: {1}", LabelMap.classLabels[class_idx], confidence);
+            return ans;
         }
+        public void Stop() => _stopSignal.Set();
         private void worker()
         {
             string name;
@@ -83,12 +94,12 @@ namespace RecognitionLibrary
             {
                 if (_stopSignal.WaitOne(0))
                 {
-                    Console.WriteLine("Stopping thread by signal");
+                    write("Stopping thread by signal");
                     return;
                 }
-                Console.WriteLine(Predict(ImageToTensor(name)));
+                write(Predict(ImageToTensor(name)));
             }
-            Console.WriteLine("Stopping thread normally");
+            write("Stopping thread normally");
         }
         public void Work()
         {
@@ -98,20 +109,15 @@ namespace RecognitionLibrary
             }
             catch (DirectoryNotFoundException exc)
             {
-                Console.WriteLine("Directory doesn't exist!");
+                write("Directory doesn't exist!");
                 return;
             }
-
-            Console.CancelKeyPress += (sender, eArgs) => {
-                _stopSignal.Set();
-                eArgs.Cancel = true;
-            };
 
             var max_proc_count = Environment.ProcessorCount;
             Thread[] threads = new Thread[max_proc_count];
             for (int i = 0; i < max_proc_count; ++i)
             {
-                Console.WriteLine("Statring thread");
+                write("Statring thread");
                 threads[i] = new Thread(worker);
                 threads[i].Start();
             }
@@ -121,7 +127,7 @@ namespace RecognitionLibrary
                 threads[i].Join();
                 
             }
-            Console.WriteLine("Done!");
+            write("Done!");
         }
     }
 }
