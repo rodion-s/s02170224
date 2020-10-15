@@ -8,10 +8,21 @@ namespace ImageRecognition
     class Program
 
     {
-        public static void my_output_function(string to_out)
+        private static void OutResultFunc(PredictionResult predictionResult)
         {
-            System.Console.WriteLine(to_out);
+            var res = String.Format("Path: {0}, Label: {1}, Confidence: {2}", predictionResult.Path, predictionResult.Label, predictionResult.Confidence);
+            Console.WriteLine(res);
         }
+
+        private static void OutErrFunc(string err_msg)
+        {
+            Console.WriteLine(err_msg);
+        }
+        private static void OutInfoFunc(string info_msg)
+        {
+            Console.WriteLine(info_msg);
+        }
+
         static void Main(string[] args)
         {
             
@@ -19,8 +30,12 @@ namespace ImageRecognition
             string imgPath = args.FirstOrDefault() ?? "./../../../../dataset/";
             string modelFilePath = "./../../../../resnet50-v2-7.onnx";
 
-            Model model = new Model(my_output_function, modelFilePath, imgPath);
-            
+            Model model = new Model(modelFilePath, imgPath);
+
+            model.ResultEvent += OutResultFunc;
+            model.ErrMessage += OutErrFunc;
+            model.InfoMessage += OutInfoFunc;
+
             Console.CancelKeyPress += (sender, eArgs) => {
                 model.Stop();
                 eArgs.Cancel = true;

@@ -13,7 +13,18 @@ using System.Threading;
 
 namespace RecognitionLibrary
 {
-    
+    public class PredictionResult
+    {
+        public string Path;
+        public string Label;
+        public double Confidence;
+        public PredictionResult(string path, string label, double confidence)
+        {
+            this.Path = path;
+            this.Label = label;
+            this.Confidence = confidence;
+        }
+    };
     public class Model
     {
         private static ManualResetEvent _stopSignal = new ManualResetEvent(false);
@@ -22,17 +33,25 @@ namespace RecognitionLibrary
         private ConcurrentQueue<string> filenames;
 
 
-        public delegate void Output(string msg);
-        Output write;
+        public delegate void PredictionHandler(PredictionResult Result);
+        public event PredictionHandler ResultEvent;
 
-        public Model(Output write,
+        public delegate void ErrorHandler(string errMessage);
+        public event ErrorHandler ErrMessage;
+
+        public delegate void InfoHandler(string infoMessage);
+        public event InfoHandler InfoMessage;
+
+        public delegate void Output(string msg);
+
+        
+        public Model(
             string model_path = "./../../../../resnet50-v2-7.onnx",
             string img_path = "./../../../../dog.jpeg"
             )
         {
             this._img_path = img_path;
             this.session = new InferenceSession(model_path);
-            this.write += write;
         }
         
         private DenseTensor<float> ImageToTensor(string single_img_path)
@@ -67,7 +86,7 @@ namespace RecognitionLibrary
             }
             return input;
         }
-        private string Predict(DenseTensor<float> input)
+        private PredictionResult Predict(DenseTensor<float> input, string single_image_path)
         {
             var inputs = new List<NamedOnnxValue>
             {
@@ -83,8 +102,8 @@ namespace RecognitionLibrary
             var confidence = softmax.Max();
             var class_idx = softmax.ToList().IndexOf(confidence);
 
-            var ans = String.Format("Label: {0}, Confidence: {1}", LabelMap.classLabels[class_idx], confidence);
-            return ans;
+
+            return new PredictionResult(single_image_path, LabelMap.classLabels[class_idx], confidence);
         }
         public void Stop() => _stopSignal.Set();
         private void worker()
@@ -94,12 +113,13 @@ namespace RecognitionLibrary
             {
                 if (_stopSignal.WaitOne(0))
                 {
-                    write("Stopping thread by signal");
+                    ErrMessage?.Invoke("Stopping Thread by signal");
                     return;
                 }
-                write(Predict(ImageToTensor(name)));
+                ResultEvent?.Invoke(Predict(ImageToTensor(name), name));
+               
             }
-            write("Stopping thread normally");
+            InfoMessage?.Invoke("Stopping thread normally");
         }
         public void Work()
         {
@@ -109,7 +129,7 @@ namespace RecognitionLibrary
             }
             catch (DirectoryNotFoundException exc)
             {
-                write("Directory doesn't exist!");
+                ErrMessage?.Invoke("Directory doesn't exist!");
                 return;
             }
 
@@ -117,7 +137,7 @@ namespace RecognitionLibrary
             Thread[] threads = new Thread[max_proc_count];
             for (int i = 0; i < max_proc_count; ++i)
             {
-                write("Statring thread");
+                InfoMessage?.Invoke("Statring thread");
                 threads[i] = new Thread(worker);
                 threads[i].Start();
             }
@@ -127,7 +147,7 @@ namespace RecognitionLibrary
                 threads[i].Join();
                 
             }
-            write("Done!");
+            InfoMessage?.Invoke("Done!");
         }
     }
 }
