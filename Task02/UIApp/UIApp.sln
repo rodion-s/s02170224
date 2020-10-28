@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIApp", "UIApp\UIApp.csproj", "{BFBA27A1-84B8-4EEB-960D-2BAF0D830EC4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecognitionLibrary", "..\ClassLibrary\RecognitionLibrary.csproj", "{BF512EC4-C2FA-4C7E-9BA6-E08EF0EE4883}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFBA27A1-84B8-4EEB-960D-2BAF0D830EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFBA27A1-84B8-4EEB-960D-2BAF0D830EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFBA27A1-84B8-4EEB-960D-2BAF0D830EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFBA27A1-84B8-4EEB-960D-2BAF0D830EC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF512EC4-C2FA-4C7E-9BA6-E08EF0EE4883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF512EC4-C2FA-4C7E-9BA6-E08EF0EE4883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF512EC4-C2FA-4C7E-9BA6-E08EF0EE4883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF512EC4-C2FA-4C7E-9BA6-E08EF0EE4883}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E699A3AE-4BBE-4A24-84A6-1D968E42300B}
+	EndGlobalSection
+EndGlobal
