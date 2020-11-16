@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ClassLibrary\RecognitionLibrary.csproj" />
+    <ProjectReference Include="..\..\..\Task01\ClassLibrary\RecognitionLibrary.csproj" />
   </ItemGroup>
 
 </Project>
