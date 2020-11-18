@@ -24,18 +24,11 @@ namespace RecognitionLibrary
         public DbSet<Result> Results { get; set; }
         public DbSet<ImgDetail> ImgDetails { get; set; }
 
-        /*public MyResultContext()
-        {
-            Database.EnsureDeleted();
-            //Database.EnsureCreated();
-        }*/
+        
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-        //optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ImageRecognitionDB;Trusted_Connection=True;");
-        //optionsBuilder.UseSqlite("Data Source=/../../../../RecognitionLibraryNew/images_new.db");
+        optionsBuilder.UseSqlite(@"Data Source=..\..\..\..\my_db.db");
 
-        //optionsBuilder.UseSqlite(@"Data Source=C:\foo_db\my_db_test.db");
-        optionsBuilder.UseSqlite(@"Data Source=..\..\..\..\my_db_lol.db");
         public void Clear()
         {
             lock (this)
