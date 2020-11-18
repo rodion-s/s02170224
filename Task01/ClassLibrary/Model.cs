@@ -133,6 +133,7 @@ namespace RecognitionLibrary
                 return;
             }
 
+            _stopSignal = new ManualResetEvent(false);
             var max_proc_count = Environment.ProcessorCount;
             Thread[] threads = new Thread[max_proc_count];
             for (int i = 0; i < max_proc_count; ++i)
@@ -142,11 +143,6 @@ namespace RecognitionLibrary
                 threads[i].Start();
             }
 
-            for (int i = 0; i < max_proc_count; ++i)
-            {
-                threads[i].Join();
-                
-            }
             InfoMessage?.Invoke("Done!");
         }
     }
