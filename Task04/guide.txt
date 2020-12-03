@@ -1,0 +1,8 @@
+Как настроить проект с бд с нуля:
+1) Создать консольное приложение net core
+2) зайти в папку с этим проектом (чтоб в ней было .csproj)
+3) выполнить в терминале dotnet add package Microsoft.EntityFrameworkCore --version 5.0.0
+4) выполнить в терминале dotnet add package Microsoft.EntityFrameworkCore.Sqlite  
+5) выполнить в терминале dotnet add package Microsoft.EntityFrameworkCore.Design --version 5.0.0
+6) выполнить в терминале dotnet ef migrations add FirstVersion
+7) выполнить в терминале dotnet ef database update
