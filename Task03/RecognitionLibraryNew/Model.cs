@@ -185,13 +185,13 @@ namespace RecognitionLibrary
             {
                 if (_stopSignal.WaitOne(0))
                 {
-                    ErrMessage?.Invoke("Stopping Thread by signal");
+                    //ErrMessage?.Invoke("Stopping Thread by signal");
                     return;
                 }
                 ResultEvent?.Invoke(Predict_with_db(ImageToTensor(name), name));
 
             }
-            InfoMessage?.Invoke("Stopping thread normally");
+            //InfoMessage?.Invoke("Stopping thread normally");
         }
 
      
@@ -216,7 +216,7 @@ namespace RecognitionLibrary
                 threads[i] = new Thread(worker);
                 threads[i].Start();
             }
-            InfoMessage?.Invoke("Done!");
+            //InfoMessage?.Invoke("Done!");
         }
 
         public List<string> ShowDbStats()

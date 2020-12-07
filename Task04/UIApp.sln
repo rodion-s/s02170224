@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Contracts\Cont
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{D2CF4613-39D7-41E3-BCEA-EAC5A54B255B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageRecognition", "ImageRecognition\ImageRecognition.csproj", "{303F3FDB-3632-4D2D-A0D9-0E493EE64FE3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D2CF4613-39D7-41E3-BCEA-EAC5A54B255B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2CF4613-39D7-41E3-BCEA-EAC5A54B255B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2CF4613-39D7-41E3-BCEA-EAC5A54B255B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{303F3FDB-3632-4D2D-A0D9-0E493EE64FE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{303F3FDB-3632-4D2D-A0D9-0E493EE64FE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{303F3FDB-3632-4D2D-A0D9-0E493EE64FE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{303F3FDB-3632-4D2D-A0D9-0E493EE64FE3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
