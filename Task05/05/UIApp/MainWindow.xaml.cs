@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security;
 using System.Text;
 using System.Threading;
@@ -19,6 +20,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Contracts;
+using Newtonsoft.Json;
 using RecognitionLibrary;
 
 
@@ -28,6 +31,11 @@ namespace UIApp
     public partial class MainWindow : Window
     {
         private Model mdl = new Model();
+        private static CancellationTokenSource ct = new CancellationTokenSource();
+
+        private static readonly HttpClient client = new HttpClient();
+        private static readonly string url = "https://localhost:5001/server";
+
 
         private ObservableCollection<Image> all_images;
         private ObservableCollection<ClassName> class_counts;
@@ -40,8 +48,11 @@ namespace UIApp
         public static RoutedCommand Start = new RoutedCommand("Start", typeof(MainWindow));
         public static RoutedCommand Stop = new RoutedCommand("Stop", typeof(MainWindow));
 
+        public static RoutedCommand ClearDB = new RoutedCommand("ClearDB", typeof(MainWindow));
+
         private bool isDirSelected = false;
         private bool isWorking = false;
+        private bool isClearingDB = false;
 
         public string selected_dir;
 
@@ -53,8 +64,8 @@ namespace UIApp
             {
                 all_results.Add(current_result);
                 var current_class = from i in class_counts
-                        where i.Class == current_result.Label
-                        select i;
+                                    where i.Class == current_result.Label
+                                    select i;
                 if (current_class.Count() == 0)
                 {
                     class_counts.Add(new ClassName(current_result.Label));
@@ -70,8 +81,6 @@ namespace UIApp
                     select i;
                 current_image.First().Class = current_result.Label;
 
-
-                
             }
             ));
         }
@@ -86,7 +95,10 @@ namespace UIApp
             this.selected_dir = dialog.SelectedPath;
             this.isDirSelected = true;
         }
-        private void StartCommandHandler(object sender, ExecutedRoutedEventArgs e)
+
+
+
+        private void StartCommandHandler_Task3(object sender, ExecutedRoutedEventArgs e)
         {
             this.isWorking = true;
 
@@ -104,16 +116,112 @@ namespace UIApp
                 }
             }));
 
-            string model_path = "./../../../../resnet50-v2-7.onnx";
+            string model_path = "C:/test_mdl/resnet50-v2-7.onnx";
             mdl = new Model(model_path, selected_dir);
             mdl.ResultEvent += OutputHandler;
             mdl.Work();
+        }
+
+        private void StartCommandHandler(object sender, ExecutedRoutedEventArgs e)
+        {
+            this.isWorking = true;
+
+            all_results.Clear();
+            all_images.Clear();
+            class_counts.Clear();
+
+            ForPost();
+        }
+        private async void ForPost()
+        {
+            try
+            {
+                var content = new StringContent(JsonConvert.SerializeObject(selected_dir), Encoding.UTF8, "application/json");
+                HttpResponseMessage httpResponse;
+                try
+                {
+                    httpResponse = await client.PostAsync(url, content, ct.Token);
+                }
+                catch (HttpRequestException exc)
+                {
+                    await Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MessageBox.Show(exc.Message + "No connection");
+                        StopCommandHandler(null, null);
+                    }));
+                    return;
+                }
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var res = httpResponse.Content.ReadAsStringAsync().Result;
+                    var item = JsonConvert.DeserializeObject<List<SinglePrediction>>(res);
+                    foreach (var current_result in item)
+                    {
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            PredictionResult pred_result = new PredictionResult(current_result.Path, 
+                                                                                current_result.Label, 
+                                                                                current_result.Confidence);
+                            all_results.Add(pred_result);
+                            var current_class = from i in class_counts
+                                                where i.Class == current_result.Label
+                                                select i;
+                            if (current_class.Count() == 0)
+                            {
+                                class_counts.Add(new ClassName(current_result.Label));
+                            }
+                            else
+                            {
+                                current_class.First().Count++;
+                                list_box_predicted_labels_Updater.Refresh();
+                            }
+
+                            var byteImg = Convert.FromBase64String(current_result.Image);
+                            using var ms = new MemoryStream(byteImg);
+                            var image = new BitmapImage();
+                            image.BeginInit();
+                            image.CacheOption = BitmapCacheOption.OnLoad;
+                            image.StreamSource = ms;
+                            image.EndInit();
+                            var to_add = new Image(current_result.Path);
+                            to_add.Bitmap = image;
+                            to_add.Class = current_result.Label;
+                           
+                            all_images.Add(to_add);
+                           
+                        }));
+                    }
+
+                   
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    MessageBox.Show("Stopped");
+                }));
+            }
+        }
+        private void StopCommandHandler_Task3(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (mdl != null)
+            {
+                mdl.Stop();
+            }
+            this.isWorking = false;
         }
         private void StopCommandHandler(object sender, ExecutedRoutedEventArgs e)
         {
             if (mdl != null)
             {
-                mdl.Stop();
+                ct.Cancel(false);
+                ct.Dispose();
+                ct = new CancellationTokenSource();
+
+                //mdl.Stop();
+                
             }
             this.isWorking = false;
         }
@@ -128,6 +236,10 @@ namespace UIApp
         private void CanStopCommandHandler(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = this.isWorking;
+        }
+        private void CanClearDBHandler(object sener, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !this.isClearingDB && !this.isWorking;
         }
         public MainWindow()
         {
@@ -174,7 +286,7 @@ namespace UIApp
             }
         }
 
-        private void Stats_Button_Click(object sender, RoutedEventArgs e)
+        private void Stats_Button_Click_Task3(object sender, RoutedEventArgs e)
         {
             db_stats.Clear();
             
@@ -187,12 +299,64 @@ namespace UIApp
             list_box_db_stats.Items.Refresh();
             
         }
+        private void Stats_Button_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var httpResponse = client.GetAsync(url).Result;
+                var stats = JsonConvert.DeserializeObject<string[]>(httpResponse.Content.ReadAsStringAsync().Result);
+                if (stats.Length == 0)
+                {
+                    db_stats.Clear();
+                    db_stats.Clear();
+                }
+                else
+                {
+                    db_stats.Clear();
+                    foreach (var item in stats)
+                    {
+                        db_stats.Add(item);
+                    }
+                }
+                list_box_db_stats.Items.Refresh();
+            }
+            catch (AggregateException exc)
+            {
+                MessageBox.Show(exc.Message + " No connection");
+                return;
+            }
+        }
 
-        private void Clear_Button_Click(object sender, RoutedEventArgs e)
+        private void Clear_Button_Click_Task3(object sender, RoutedEventArgs e)
         {
             mdl.ClearDB();
             db_stats.Clear();
             list_box_db_stats.Items.Refresh();
+        }
+        private void ClearDBCommandHandler(object sender, ExecutedRoutedEventArgs e)
+        {
+            isClearingDB = true;
+            ThreadPool.QueueUserWorkItem(new WaitCallback(param =>
+            {
+                try
+                {
+                    var httpResponse = client.DeleteAsync(url).Result;
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        db_stats.Clear();
+                        list_box_db_stats.Items.Refresh();
+                    }));
+                }
+                catch (AggregateException exc)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MessageBox.Show(exc.Message + " No connection");
+                    }));
+                }
+
+                isClearingDB = false;
+            }));
         }
     }
 
