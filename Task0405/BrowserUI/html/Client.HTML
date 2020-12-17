@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task5</title>
+    <script src="../js/jquery-3.5.1.js"></script>
+    <script src="../js/require.js"></script>
+</head>
+<body>
+    <!--<div id="label"></div>-->
+        <table style="border-collapse: collapse; width: 100%;" border="1" id="main_table">
+        <tbody>
+        <tr>
+        <td style="width: 50%;">
+        <p style="text-align: center;" id="for_label"></p>
+        <p style="text-align: center;"><input id="image_input" name="name" type="file" /> <canvas id="image_canvas" class="canvas_for_image" width="224px" height="224px"></canvas></p>
+        </td>
+        <td style="width: 50%; text-align: center;"><button id="display_all">Display all</button></td>
+        </tr>
+        </tbody>
+        </table>
+        <script src="../js/main.js"></script>
+
+        <table id="myTableId" border=2>
+            <thead>
+                <tr>
+                    <th>Image</th><th>Label</th><th>Confidence</th><th>Path</th>
+                </tr>
+            </thead>
+        </table>
+    
+</body>
+</html>

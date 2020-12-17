@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\..\\ForLab4\\LibraryServer"
+		},
+		{
+			"path": "..\\..\\..\\ForLab4\\LibraryClient"
+		},
+		{
+			"path": "..\\..\\..\\ForLab4\\LibraryContracts"
+		}
+	],
+	"settings": {}
+}
